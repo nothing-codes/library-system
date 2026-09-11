@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Роли {
+  Id       Int     @id @default(autoincrement())
+  Название String  @unique
+  Пользователи Пользователи[]
+  @@map("Роли")
+}
+
+model Пользователи {
+  Id       Int     @id @default(autoincrement())
+  Логин    String  @unique
+  Пароль   String
+  IdРоли   Int
+  Роль     Роли    @relation(fields: [IdРоли], references: [Id])
+  Читатели Читатели?
+  @@map("Пользователи")
+}
+
+model Читатели {
+  ЧитательID      Int      @id @default(autoincrement())
+  IdПользователя  Int?     @unique
+  Фамилия         String
+  Имя             String
+  Отчество        String?
+  Телефон         String?
+  Класс           String?
+  ПарольОткрытый  String?
+  Пользователь    Пользователи? @relation(fields: [IdПользователя], references: [Id])
+  Выдачи          Выдачи[]
+  @@map("Читатели")
+}
+
+model Книги {
+  Id         Int     @id @default(autoincrement())
+  Название   String
+  Автор      String
+  Год        Int?
+  ISBN       String? @unique
+  Количество Int     @default(0)
+  Выдачи     Выдачи[]
+  @@map("Книги")
+}
+
+model Статус {
+  Id       Int     @id @default(autoincrement())
+  Название String
+  Выдачи   Выдачи[]
+  @@map("Статус")
+}
+
+model Выдачи {
+  Id            Int      @id @default(autoincrement())
+  IdКниги        Int
+  IdЧитателя     Int
+  ДатаВыдачи     String
+  ДатаОкончания  String?
+  ДатаВозврата   String?
+  СрокВыдачи     Int      @default(14)
+  IdСтатус       Int
+  Книга          Книги     @relation(fields: [IdКниги], references: [Id])
+  Читатель       Читатели  @relation(fields: [IdЧитателя], references: [ЧитательID])
+  Статус        Статус    @relation(fields: [IdСтатус], references: [Id])
+  @@map("Выдачи")
+}

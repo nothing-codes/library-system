@@ -1,0 +1,12 @@
+{
+  "name": "library-system",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "jose": "^5.9.6"
+  },
+  "devDependencies": {
+    "dotenv": "^17.4.2"
+  }
+}

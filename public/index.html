@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Вход — Библиотека</title>
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <div class="login-wrap">
+    <form class="login-card" id="login-form">
+      <h1>Вход в библиотеку</h1>
+
+      <div class="field">
+        <label for="login">Логин</label>
+        <input id="login" name="login" autocomplete="username" required />
+      </div>
+
+      <div class="field">
+        <label for="password">Пароль</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required />
+      </div>
+
+      <div id="login-msg" class="msg error hidden"></div>
+
+      <button type="submit" class="primary" style="width:100%" id="login-btn">Войти</button>
+    </form>
+  </div>
+
+  <script type="module">
+    import { api, showMessage, hideMessage } from "/app.js";
+
+    const form = document.getElementById("login-form");
+    const msg = document.getElementById("login-msg");
+    const btn = document.getElementById("login-btn");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      hideMessage(msg);
+      btn.disabled = true;
+      btn.textContent = "Вход...";
+
+      try {
+        const data = await api("/api/login", {
+          method: "POST",
+          body: JSON.stringify({
+            login: form.login.value.trim(),
+            password: form.password.value,
+          }),
+        });
+        window.location.href = data.role === "librarian" ? "/librarian" : "/reader";
+      } catch (err) {
+        showMessage(msg, err.message, "error");
+        btn.disabled = false;
+        btn.textContent = "Войти";
+      }
+    });
+  </script>
+</body>
+</html>

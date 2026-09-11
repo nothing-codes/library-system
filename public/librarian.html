@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Библиотекарь — Библиотека</title>
+  <link rel="stylesheet" href="/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="header-left">
+        <button class="burger" id="burger-btn" aria-label="Меню">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="brand">Библиотека</div>
+      </div>
+      <button id="logout-btn">Выйти</button>
+    </div>
+  </header>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <nav class="sidebar-nav">
+        <button class="sidebar-item active" data-panel="readers">Читатели</button>
+        <button class="sidebar-item" data-panel="books">Книги</button>
+        <button class="sidebar-item" data-panel="add-reader">Добавить читателя</button>
+        <button class="sidebar-item" data-panel="add-book">Добавить книгу</button>
+      </nav>
+    </aside>
+
+    <main class="main-area">
+
+      <div class="panel active" id="panel-readers">
+        <div class="readers-split">
+
+          <div class="section grow">
+            <div class="section-header">
+              <h2>Читатели</h2>
+            </div>
+            <div class="section-body padded" style="padding-bottom:0">
+              <div class="filters" style="margin-bottom:10px">
+                <input type="text" id="reader-search" placeholder="Поиск" class="search-input" />
+                <select id="reader-class-filter">
+                  <option value="">Все классы</option>
+                </select>
+                <label class="small muted" style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                  <input type="checkbox" id="only-debtors" style="width:auto" />
+                  Только должники
+                </label>
+              </div>
+            </div>
+            <div class="section-body">
+              <table>
+                <thead>
+                  <tr><th>ФИО</th><th>Телефон</th><th>Класс</th></tr>
+                </thead>
+                <tbody id="readers-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style="display:flex;flex-direction:column;gap:16px;height:100%;min-height:0">
+
+            <div class="section">
+              <div class="section-header">
+                <h2>Профиль</h2>
+                <div class="toolbar">
+                  <button id="issue-book-btn" class="primary" disabled>Выдать книгу</button>
+                  <button id="delete-reader-btn" class="danger" disabled>Удалить</button>
+                </div>
+              </div>
+              <div class="section-body padded">
+                <div id="reader-profile" class="muted small">Выберите читателя из списка</div>
+              </div>
+            </div>
+
+            <div class="section grow">
+              <div class="section-header">
+                <h2>Книги читателя</h2>
+                <div class="toolbar">
+                  <select id="issue-status-filter">
+                    <option value="">Все</option>
+                    <option value="active">Не сданы</option>
+                    <option value="returned">Сданы</option>
+                  </select>
+                </div>
+              </div>
+              <div class="section-body">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Название</th>
+                      <th>Автор</th>
+                      <th>Выдана</th>
+                      <th>Окончание</th>
+                      <th>Статус</th>
+                      <th style="width:110px"></th>
+                    </tr>
+                  </thead>
+                  <tbody id="issues-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-books">
+        <div class="section grow">
+          <div class="section-header">
+            <h2>Книги в библиотеке</h2>
+          </div>
+          <div class="section-body padded" style="padding-bottom:0">
+            <div class="filters" style="margin-bottom:10px">
+              <input type="text" id="book-search" placeholder="Поиск" class="search-input" />
+              <select id="book-availability-filter">
+                <option value="">Все</option>
+                <option value="available">Только в наличии</option>
+                <option value="empty">Нет в наличии</option>
+              </select>
+              <button id="delete-book-btn" class="danger" disabled>Удалить книгу</button>
+            </div>
+          </div>
+          <div class="section-body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Название</th>
+                  <th>Автор</th>
+                  <th style="width:60px">Год</th>
+                  <th>ISBN</th>
+                  <th style="width:90px">Кол-во</th>
+                </tr>
+              </thead>
+              <tbody id="books-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-add-reader">
+        <div class="section">
+          <div class="section-header">
+            <h2>Новый читатель</h2>
+            <div class="toolbar">
+              <button id="export-readers-btn">Экспорт в Excel</button>
+              <label class="btn" style="cursor:pointer;margin:0">
+                Импорт из Excel
+                <input type="file" id="import-readers-input" accept=".xlsx,.xls" style="display:none" />
+              </label>
+            </div>
+          </div>
+          <div class="section-body padded" style="max-width:520px">
+            <div class="field"><label>Фамилия</label><input id="ar-last" /></div>
+            <div class="field"><label>Имя</label><input id="ar-first" /></div>
+            <div class="field"><label>Отчество</label><input id="ar-middle" /></div>
+            <div class="field"><label>Телефон</label><input id="ar-phone" /></div>
+            <div class="field"><label>Класс</label><input id="ar-class" /></div>
+            <div id="ar-msg" class="msg hidden"></div>
+            <div class="toolbar" style="margin-top:12px">
+              <button id="ar-save" class="primary">Создать читателя</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" id="panel-add-book">
+        <div class="section">
+          <div class="section-header">
+            <h2>Новая книга</h2>
+            <div class="toolbar">
+              <button id="export-books-btn">Экспорт в Excel</button>
+              <label class="btn" style="cursor:pointer;margin:0">
+                Импорт из Excel
+                <input type="file" id="import-books-input" accept=".xlsx,.xls" style="display:none" />
+              </label>
+            </div>
+          </div>
+          <div class="section-body padded" style="max-width:520px">
+            <div class="field"><label>Название</label><input id="ab-title" /></div>
+            <div class="field"><label>Автор</label><input id="ab-author" /></div>
+            <div class="field"><label>Год</label><input id="ab-year" type="number" /></div>
+            <div class="field"><label>ISBN</label><input id="ab-isbn" /></div>
+            <div class="field"><label>Количество</label><input id="ab-quantity" type="number" value="1" /></div>
+            <div id="ab-msg" class="msg hidden"></div>
+            <div class="toolbar" style="margin-top:12px">
+              <button id="ab-save" class="primary">Сохранить книгу</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="issue-modal">
+    <div class="modal" style="max-width:720px">
+      <div class="modal-header">Выдать книгу</div>
+      <div class="modal-body">
+        <div class="hint">Выберите книгу для выдачи читателю</div>
+        <input type="text" id="issue-search" placeholder="Поиск" style="margin-bottom:10px" />
+        <div style="max-height:480px;overflow:auto;border:1px solid #e5e5e5;border-radius:4px">
+          <table>
+            <thead>
+              <tr>
+                <th style="width:250px">Название</th>
+                <th style="width:150px">Автор</th>
+                <th style="width:60px">Год</th>
+                <th>ISBN</th>
+                <th style="width:80px">Кол-во</th>
+              </tr>
+            </thead>
+            <tbody id="issue-books-tbody"></tbody>
+          </table>
+        </div>
+        <div id="issue-msg" class="msg error hidden" style="margin-top:10px"></div>
+      </div>
+      <div class="modal-footer">
+        <button id="issue-cancel">Отмена</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/librarian.js"></script>
+</body>
+</html>
