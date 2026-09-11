@@ -9,66 +9,72 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-model Роли {
-  Id       Int     @id @default(autoincrement())
-  Название String  @unique
-  Пользователи Пользователи[]
+model Role {
+  id           Int            @id @default(autoincrement())
+  name         String         @unique
+  users        User[]
+
   @@map("Роли")
 }
 
-model Пользователи {
-  Id       Int     @id @default(autoincrement())
-  Логин    String  @unique
-  Пароль   String
-  IdРоли   Int
-  Роль     Роли    @relation(fields: [IdРоли], references: [Id])
-  Читатели Читатели?
+model User {
+  id           Int            @id @default(autoincrement())
+  login        String         @unique
+  password     String
+  roleId       Int
+  role         Role           @relation(fields: [roleId], references: [id])
+  reader       Reader?
+
   @@map("Пользователи")
 }
 
-model Читатели {
-  ЧитательID      Int      @id @default(autoincrement())
-  IdПользователя  Int?     @unique
-  Фамилия         String
-  Имя             String
-  Отчество        String?
-  Телефон         String?
-  Класс           String?
-  ПарольОткрытый  String?
-  Пользователь    Пользователи? @relation(fields: [IdПользователя], references: [Id])
-  Выдачи          Выдачи[]
+model Reader {
+  id           Int            @id @default(autoincrement())
+  userId       Int?           @unique
+  lastName     String
+  firstName    String
+  middleName   String?
+  phone        String?
+  className    String?
+  openPassword String?
+  user         User?          @relation(fields: [userId], references: [id])
+  issues       Issue[]
+
   @@map("Читатели")
 }
 
-model Книги {
-  Id         Int     @id @default(autoincrement())
-  Название   String
-  Автор      String
-  Год        Int?
-  ISBN       String? @unique
-  Количество Int     @default(0)
-  Выдачи     Выдачи[]
+model Book {
+  id           Int            @id @default(autoincrement())
+  title        String
+  author       String
+  year         Int?
+  isbn         String?        @unique
+  quantity     Int            @default(0)
+  issues       Issue[]
+
   @@map("Книги")
 }
 
-model Статус {
-  Id       Int     @id @default(autoincrement())
-  Название String
-  Выдачи   Выдачи[]
+model Status {
+  id           Int            @id @default(autoincrement())
+  name         String
+  issues       Issue[]
+
   @@map("Статус")
 }
 
-model Выдачи {
-  Id            Int      @id @default(autoincrement())
-  IdКниги        Int
-  IdЧитателя     Int
-  ДатаВыдачи     String
-  ДатаОкончания  String?
-  ДатаВозврата   String?
-  СрокВыдачи     Int      @default(14)
-  IdСтатус       Int
-  Книга          Книги     @relation(fields: [IdКниги], references: [Id])
-  Читатель       Читатели  @relation(fields: [IdЧитателя], references: [ЧитательID])
-  Статус        Статус    @relation(fields: [IdСтатус], references: [Id])
+model Issue {
+  id           Int            @id @default(autoincrement())
+  bookId       Int
+  readerId     Int
+  issueDate    String
+  dueDate      String?
+  returnDate   String?
+  loanPeriod   Int            @default(14)
+  statusId     Int
+  book         Book           @relation(fields: [bookId], references: [id])
+  reader       Reader         @relation(fields: [readerId], references: [id])
+  status       Status         @relation(fields: [statusId], references: [id])
+
   @@map("Выдачи")
 }
