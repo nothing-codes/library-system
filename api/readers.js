@@ -1,6 +1,6 @@
-import { supabase } from "../lib/supabase.js"; // ИСПРАВЛЕНО
-import { requireLibrarian } from "../lib/auth.js"; // ИСПРАВЛЕНО
-import { hashPassword } from "../lib/hash.js"; // ИСПРАВЛЕНО
+import { supabase } from "../lib/supabase.js";
+import { requireLibrarian } from "../lib/auth.js";
+import { hashPassword } from "../lib/hash.js";
 
 function generatePassword(len = 8) {
   const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
@@ -15,7 +15,6 @@ export default async function handler(req, res) {
 
   if (req.method === "GET") {
     const { search = "", debtors } = req.query;
-
     let query = supabase.from("readers").select(`
       reader_id, last_name, first_name, middle_name, phone, class_name, open_password,
       users ( login )
@@ -55,15 +54,17 @@ export default async function handler(req, res) {
     const hashed = hashPassword(password);
 
     try {
+      // 1. Создаем пользователя
       const { data: user, error: userError } = await supabase.from("users").insert({
         login,
         password: hashed,
-        role_id: 1
+        role_id: 1 // 1 = reader
       }).select("id").single();
 
       if (userError) throw userError;
 
-      await supabase.from("readers").insert({
+      // 2. Создаем профиль читателя
+      const { error: readerError } = await supabase.from("readers").insert({
         user_id: user.id,
         last_name: lastName,
         first_name: firstName,
@@ -72,6 +73,12 @@ export default async function handler(req, res) {
         class_name: className ?? "",
         open_password: password
       });
+
+      // 3. Если профиль не создался — откатываем создание пользователя
+      if (readerError) {
+        await supabase.from("users").delete().eq("id", user.id);
+        throw new Error(`Ошибка сохранения читателя: ${readerError.message}`);
+      }
 
       res.json({ login, password });
     } catch (e) {
