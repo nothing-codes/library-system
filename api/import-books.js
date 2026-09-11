@@ -1,5 +1,5 @@
-import { requireLibrarian } from "../../lib/auth.js";
-import { supabase } from "../../lib/supabase.js";
+import { requireLibrarian } from "../lib/auth.js"; // ИСПРАВЛЕНО
+import { supabase } from "../lib/supabase.js"; // ИСПРАВЛЕНО
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();

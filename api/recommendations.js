@@ -1,5 +1,5 @@
-import { getSession } from "../../lib/auth.js";
-import { supabase } from "../../lib/supabase.js";
+import { getSession } from "../lib/auth.js"; // ИСПРАВЛЕНО
+import { supabase } from "../lib/supabase.js"; // ИСПРАВЛЕНО
 
 export default async function handler(req, res) {
   const s = await getSession(req, process.env.JWT_SECRET);
@@ -9,7 +9,6 @@ export default async function handler(req, res) {
 
   const readerId = s.readerId;
 
-  // Получаем авторов, которых читатель уже читал
   const { data: history } = await supabase.from("issues").select("books ( author )").eq("reader_id", readerId).in("status_id", [2, 3]);
   const authors = [...new Set(history?.map(h => h.books?.author).filter(Boolean))] || [];
 
@@ -35,15 +34,8 @@ export default async function handler(req, res) {
   }
 
   if (type === "popular" || result.length === 0) {
-    // Fallback: популярные книги (по количеству выдач)
-    const { data: popular } = await supabase.rpc('get_popular_books');
-    if (popular) {
-      result = popular;
-    } else {
-      // Базовый fallback, если RPC нет
-      const { data: allBooks } = await supabase.from("books").select("id, title, author, year").gt("quantity", 0).limit(5);
-      result = allBooks || [];
-    }
+    const { data: allBooks } = await supabase.from("books").select("id, title, author, year").gt("quantity", 0).limit(5);
+    result = allBooks || [];
   }
 
   const mapped = result.map(b => ({

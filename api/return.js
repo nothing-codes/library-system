@@ -1,5 +1,5 @@
-import { requireLibrarian } from "../../lib/auth.js";
-import { supabase } from "../../lib/supabase.js";
+import { requireLibrarian } from "../lib/auth.js"; // ИСПРАВЛЕНО
+import { supabase } from "../lib/supabase.js"; // ИСПРАВЛЕНО
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   if (issue.status_id === 1) return res.status(409).json({ error: "Книга уже возвращена" });
 
   const { error: updateError } = await supabase.from("issues").update({
-    status_id: 1, // 1 = returned
+    status_id: 1,
     return_date: new Date().toISOString().slice(0, 10)
   }).eq("id", issueId);
 

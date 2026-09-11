@@ -1,5 +1,5 @@
-import { supabase } from "../lib/supabase.js";
-import { requireLibrarian } from "../lib/auth.js";
+import { supabase } from "../lib/supabase.js"; // ИСПРАВЛЕНО
+import { requireLibrarian } from "../lib/auth.js"; // ИСПРАВЛЕНО
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
@@ -14,7 +14,6 @@ export default async function handler(req, res) {
     const { data, error } = await query.order("title", { ascending: true });
     if (error) return res.status(500).json({ error: error.message });
 
-    // Маппинг английских полей БД в русские ключи, ожидаемые фронтендом
     const mapped = data.map(b => ({
       Id: b.id,
       Название: b.title,

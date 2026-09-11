@@ -1,5 +1,5 @@
-import { getSession, requireLibrarian } from "../../lib/auth.js";
-import { supabase } from "../../lib/supabase.js";
+import { getSession, requireLibrarian } from "../lib/auth.js"; // ИСПРАВЛЕНО
+import { supabase } from "../lib/supabase.js"; // ИСПРАВЛЕНО
 
 export default async function handler(req, res) {
   if (req.method === "GET") {
@@ -50,13 +50,11 @@ export default async function handler(req, res) {
     const { readerId, bookId } = req.body;
     if (!readerId || !bookId) return res.status(400).json({ error: "readerId и bookId обязательны" });
 
-    // Проверка активных выдач
     const { data: active } = await supabase.from("issues").select("id").eq("reader_id", readerId).in("status_id", [2, 3]).limit(1);
     if (active && active.length > 0) {
       return res.status(409).json({ error: "У читателя уже есть книга. Сначала верните её." });
     }
 
-    // Проверка наличия книги
     const { data: book } = await supabase.from("books").select("quantity").eq("id", bookId).single();
     if (!book || book.quantity < 1) {
       return res.status(409).json({ error: "Книга недоступна" });
@@ -71,7 +69,7 @@ export default async function handler(req, res) {
       reader_id: readerId,
       issue_date: today.toISOString().slice(0, 10),
       due_date: due.toISOString().slice(0, 10),
-      status_id: 2 // 2 = issued
+      status_id: 2
     });
 
     if (issueError) return res.status(500).json({ error: issueError.message });
