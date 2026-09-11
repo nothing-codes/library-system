@@ -1,4 +1,4 @@
-import { prisma } from "../lib/db.js";
+import { supabase } from "../lib/supabase.js";
 import { verifyPassword } from "../lib/hash.js";
 import { setSession } from "../lib/auth.js";
 
@@ -10,23 +10,31 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: "Введите логин и пароль" });
   }
 
-  const user = await prisma.Пользователи.findUnique({
-    where: { Логин: login },
-    include: { Роль: true },
-  });
+  const { data: user, error } = await supabase
+    .from("Пользователи")
+    .select('"Id", "Пароль", "IdРоли", Роли("Название")')
+    .eq("Логин", login)
+    .maybeSingle();
 
-  if (!user || !(await verifyPassword(password, user.Пароль))) {
+  if (error || !user) {
     return res.status(401).json({ error: "Неверный логин или пароль" });
   }
 
-  const role = user.Роль.Название;
+  if (!(await verifyPassword(password, user.Пароль))) {
+    return res.status(401).json({ error: "Неверный логин или пароль" });
+  }
+
+  const role = user.Роли?.Название ?? "";
   let readerId = null;
   let name = "";
 
   if (role === "Читатель") {
-    const reader = await prisma.Читатели.findFirst({
-      where: { IdПользователя: user.Id },
-    });
+    const { data: reader } = await supabase
+      .from("Читатели")
+      .select('"ЧитательID", "Фамилия", "Имя", "Отчество"')
+      .eq("IdПользователя", user.Id)
+      .maybeSingle();
+
     if (reader) {
       readerId = reader.ЧитательID;
       name = `${reader.Фамилия} ${reader.Имя} ${reader.Отчество ?? ""}`.trim();

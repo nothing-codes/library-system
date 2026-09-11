@@ -4,9 +4,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "jose": "^5.9.6"
-  },
-  "devDependencies": {
-    "dotenv": "^17.4.2"
+    "jose": "^5.9.6",
+    "@supabase/supabase-js": "^2.45.0"
   }
 }
