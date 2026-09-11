@@ -432,6 +432,9 @@ document.getElementById("import-readers-input").addEventListener("change", async
     const rows = XLSX.utils.sheet_to_json(ws);
 
     const readers = rows.map((r) => {
+      // Извлекаем пароль из колонки "Пароль"
+      const password = String(r["Пароль"] ?? "").trim();
+
       if (r["ФИО"]) {
         const parts = String(r["ФИО"]).trim().split(/\s+/);
         return {
@@ -440,6 +443,7 @@ document.getElementById("import-readers-input").addEventListener("change", async
           middleName: parts[2] ?? "",
           phone: String(r["Телефон"] ?? ""),
           className: r["Класс"] ?? "",
+          password: password, // <-- Передаем пароль на сервер
         };
       }
       return {
@@ -448,6 +452,7 @@ document.getElementById("import-readers-input").addEventListener("change", async
         middleName: r["Отчество"] ?? "",
         phone: String(r["Телефон"] ?? ""),
         className: r["Класс"] ?? "",
+        password: password, // <-- Передаем пароль на сервер
       };
     });
 
