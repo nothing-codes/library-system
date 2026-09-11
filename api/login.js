@@ -1,6 +1,6 @@
-import { supabase } from "../lib/supabase.js";
-import { verifyPassword } from "../lib/hash.js";
-import { setSession } from "../lib/auth.js";
+import { supabase } from "./lib/supabase.js";
+import { verifyPassword } from "./lib/hash.js";
+import { setSession } from "./lib/auth.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
