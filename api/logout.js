@@ -1,8 +1,6 @@
-import { clearSession } from "../../lib/auth.js";
+import { clearSession } from "../lib/auth.js";
 
-export async function onRequestPost() {
-  return Response.json(
-    { ok: true },
-    { headers: { "Set-Cookie": clearSession() } }
-  );
+export default function handler(req, res) {
+  res.setHeader("Set-Cookie", clearSession());
+  res.json({ ok: true });
 }
