@@ -50,9 +50,20 @@ export default async function handler(req, res) {
     const { readerId, bookId } = req.body;
     if (!readerId || !bookId) return res.status(400).json({ error: "readerId и bookId обязательны" });
 
-    const { data: active } = await supabase.from("issues").select("id").eq("reader_id", readerId).in("status_id", [2, 3]).limit(1);
-    if (active && active.length > 0) {
-      return res.status(409).json({ error: "У читателя уже есть книга. Сначала верните её." });
+       // Проверяем, сколько книг уже на руках у читателя (статусы 2="Выдана", 3="Просрочена")
+    const { data: activeIssues, error: activeError } = await supabase
+      .from("issues")
+      .select("id")
+      .eq("reader_id", readerId)
+      .in("status_id", [2, 3]);
+
+    if (activeError) return res.status(500).json({ error: activeError.message });
+
+    const MAX_BOOKS_PER_READER = 3; // Максимальное количество книг на руках
+    if (activeIssues && activeIssues.length >= MAX_BOOKS_PER_READER) {
+      return res.status(409).json({ 
+        error: `Лимит исчерпан. Читатель может иметь на руках не более ${MAX_BOOKS_PER_READER} книг.` 
+      });
     }
 
     const { data: book } = await supabase.from("books").select("quantity").eq("id", bookId).single();
