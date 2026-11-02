@@ -135,9 +135,8 @@ function renderProfile() {
     <div class="label">ID</div><div class="value">${selectedReader.IdЧитателя}</div>
   `;
 
-  const hasActive = issues.some((i) => i.Статус !== "Возвращена");
-  issueBtn.disabled = hasActive;
-  issueBtn.title = hasActive ? "У читателя уже есть книга" : "";
+  issueBtn.disabled = false;
+  issueBtn.title = "Выдать книгу";
   delBtn.disabled = false;
 }
 
