@@ -50,7 +50,6 @@ export default async function handler(req, res) {
     const { readerId, bookId } = req.body;
     if (!readerId || !bookId) return res.status(400).json({ error: "readerId и bookId обязательны" });
 
-       // Проверяем, сколько книг уже на руках у читателя (статусы 2="Выдана", 3="Просрочена")
     const { data: activeIssues, error: activeError } = await supabase
       .from("issues")
       .select("id")
@@ -59,7 +58,7 @@ export default async function handler(req, res) {
 
     if (activeError) return res.status(500).json({ error: activeError.message });
 
-    const MAX_BOOKS_PER_READER = 3; // Максимальное количество книг на руках
+    const MAX_BOOKS_PER_READER = 5; // Максимальное количество книг на руках
     if (activeIssues && activeIssues.length >= MAX_BOOKS_PER_READER) {
       return res.status(409).json({ 
         error: `Лимит исчерпан. Читатель может иметь на руках не более ${MAX_BOOKS_PER_READER} книг.` 
